@@ -3,15 +3,28 @@ Three variants of the program P1 and program P2 (one each for communicating usin
 
 The reliability of each interprocess communication mechanism was not assumed unless guaranteed by the mechanism itself. Proper error handling and synchronization mechanisms were implemented to ensure reliable communication.
 
-## (i) Unix domain sockets:
+## Unix domain sockets:
 Socket programming enables two nodes on a network to establish communication with each other. One node acts as a server and listens on a specific port at an IP address, while the other node acts as a client and connects to the server to form a connection.
 
-## (ii) FIFOs:
+- To run the socket files (p1.c and p2.c) type "make q2_socket" and then type "./p1" first
+and then "./p2" on other terminal.
+
+
+## FIFOs:
 FIFO, also known as a named pipe, facilitates inter-process communication. It extends the traditional pipe concept on Unix systems. A FIFO file is a special file on the local storage that allows multiple processes to communicate by reading from and writing to this file.
 
-## (iii) Message passing queues:
+- To run the fifo files (fifo1.c and fifo2.c) type "make q2_fifo" and then type "./f1" first
+and then "./f2" on other terminal.
+
+
+## Message passing queues:
 Message queues consist of a linked list of messages stored within the kernel and are identified by a message queue identifier. New queues are created or existing ones are opened using the msgget() function. Messages can be added to the end of a queue with the msgsnd() function, which specifies the type, length, and data of the message. Messages are retrieved from a queue using the msgrcv() function.
 
+- To run the msgqueue files (q1.c and q2. c) type "make q2_queue" and then type "./q2" first
+and then "./q1" on other terminal.
+
+
+## Procedure
 To implement the above mechanisms, the following steps were taken for each technique:
 
 - Program P1 generated an array of 50 random strings of fixed length.
@@ -23,5 +36,3 @@ To implement the above mechanisms, the following steps were taken for each techn
 - P2 printed the IDs and strings on the console.
 - On receiving the acknowledged packet, P1 sent the next five strings starting from the successor of the acknowledged ID through the socket/FIFO.Message Queue.
 
-
-Note: 
