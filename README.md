@@ -1,38 +1,30 @@
-# Inter-Process-Communication-flow-controlled
-Three variants of the program P1 and program P2 (one each for communicating using Unix domain sockets, FIFOs and message passing queues respective) were created for the interprocess communication.
+# Flow-Controlled Inter-Process Communication
 
-The reliability of each interprocess communication mechanism was not assumed unless guaranteed by the mechanism itself. Proper error handling and synchronization mechanisms were implemented to ensure reliable communication.
+Three IPC transport mechanisms — Unix domain sockets, FIFOs, and System V message queues — implementing the same sender/receiver protocol in C, to compare their behavior under an explicit flow-control scheme.
 
-## Unix domain sockets:
-Socket programming enables two nodes on a network to establish communication with each other. One node acts as a server and listens on a specific port at an IP address, while the other node acts as a client and connects to the server to form a connection.
+Two programs, **P1** (sender) and **P2** (receiver), communicate over each mechanism:
 
-- To run the socket files (p1.c and p2.c) type "make q2_socket" and then type "./p1" first
-and then "./p2" on other terminal.
+1. P1 generates 50 random, fixed-length strings.
+2. P1 sends them to P2 in batches of 5, each string tagged with its index.
+3. P2 receives a batch, prints it, and acknowledges the highest index received.
+4. P1 waits for that acknowledgement before sending the next batch — no batch goes out until the previous one is confirmed.
 
+None of the three mechanisms' reliability is assumed. Each implementation has its own explicit error handling and synchronization, rather than relying on guarantees the mechanism doesn't actually make.
 
-## FIFOs:
-FIFO, also known as a named pipe, facilitates inter-process communication. It extends the traditional pipe concept on Unix systems. A FIFO file is a special file on the local storage that allows multiple processes to communicate by reading from and writing to this file.
+## Mechanisms
 
-- To run the fifo files (fifo1.c and fifo2.c) type "make q2_fifo" and then type "./f1" first
-and then "./f2" on other terminal.
+| Mechanism | Files | Build | Run |
+|---|---|---|---|
+| Unix domain sockets | `p1.c`, `p2.c` | `make q2_socket` | `./p1`, then `./p2` in another terminal |
+| FIFOs (named pipes) | `fifo1.c`, `fifo2.c` | `make q2_fifo` | `./f1`, then `./f2` in another terminal |
+| System V message queues | `q1.c`, `q2.c` | `make q2_queue` | `./q2`, then `./q1` in another terminal |
 
+Build everything at once with `make all`.
 
-## Message passing queues:
-Message queues consist of a linked list of messages stored within the kernel and are identified by a message queue identifier. New queues are created or existing ones are opened using the msgget() function. Messages can be added to the end of a queue with the msgsnd() function, which specifies the type, length, and data of the message. Messages are retrieved from a queue using the msgrcv() function.
+## Why three mechanisms
 
-- To run the msgqueue files (q1.c and q2. c) type "make q2_queue" and then type "./q2" first
-and then "./q1" on other terminal.
+- **Sockets** model IPC as a network connection — general-purpose, works across machines, heavier setup.
+- **FIFOs** extend the pipe abstraction into a named, filesystem-visible channel between unrelated processes.
+- **Message queues** hand buffering and message boundaries to the kernel, avoiding manual delimiter handling.
 
-
-## Procedure
-To implement the above mechanisms, the following steps were taken for each technique:
-
-- Program P1 generated an array of 50 random strings of fixed length.
-- P1 created a Unix domain socket/FIFO/Message Queue and established a connection to P2.
-- P1 divided the array of strings into groups of five consecutive elements.
-- For each group, P1 sent the strings and their corresponding IDs (indices) to P2 through the socket/FIFO.Message Queue.
-- P2 accepted the received strings and their IDs from P1 through the socket/FIFO.Message Queue.
-- P2 determined the highest ID received and sent it back to P1 to acknowledge the strings received.
-- P2 printed the IDs and strings on the console.
-- On receiving the acknowledged packet, P1 sent the next five strings starting from the successor of the acknowledged ID through the socket/FIFO.Message Queue.
-
+Implementing the same flow-controlled protocol three times surfaces the real differences between these primitives — connection setup, message-boundary handling, and blocking behavior — rather than just describing them.
